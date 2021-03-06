@@ -26,6 +26,20 @@ module.exports = (appInfo) => {
   config.security = {
     csrf: { enable: false },
   };
+  config.multipart = {
+    mode: "file",
+    // 表单 Field 文件名长度限制
+    fieldNameSize: 1000,
+    // 表单 Field 内容大小
+    fieldSize: "10mb",
+    // 表单 Field 最大个数
+    fields: 10,
+
+    // 单个文件大小
+    fileSize: "10mb",
+    // 允许上传的最大文件数
+    files: 10,
+  };
 
   return {
     ...config,
