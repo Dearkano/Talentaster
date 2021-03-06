@@ -11,8 +11,8 @@ class HomeController extends Controller {
 
   async upload() {
     const { ctx } = this;
-    console.log(ctx);
-    ctx.body = { message: "success" };
+    console.log(ctx.request.files);
+    ctx.body = ctx.request.files;
     ctx.status = 200;
   }
 }

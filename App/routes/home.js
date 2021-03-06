@@ -1,9 +1,16 @@
 import { StatusBar } from "expo-status-bar";
 import React, { useState } from "react";
-import { StyleSheet, Text, View, TouchableOpacity, Alert } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  Alert,
+  ActivityIndicator,
+} from "react-native";
 import { Camera } from "expo-camera";
 import { CameraPreview } from "../Component/camera";
-import { launchCamera, launchImageLibrary } from "react-native-image-picker";
+import * as ImagePicker from "expo-image-picker";
 
 let camera = null;
 export default function App({ navigation }) {
@@ -13,18 +20,56 @@ export default function App({ navigation }) {
   const [cameraType, setCameraType] = useState(Camera.Constants.Type.back);
   const [flashMode, setFlashMode] = useState("off");
   const [loading, setLoading] = useState(false);
+  const [response, setResponse] = useState(null);
 
-  const __loadLibrary = () => {};
+  const __loadLibrary = async () => {
+    setLoading(true);
+    const response = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+    await __uploadImage(response);
+    setLoading(false);
+  };
 
   const __startCamera = async () => {
     const { status } = await Camera.requestPermissionsAsync();
-    console.log(status);
     if (status === "granted") {
       setStartCamera(true);
     } else {
       Alert.alert("Access denied");
     }
   };
+
+  const __uploadImage = async (photo) => {
+    const file = {
+      uri: photo.uri.replace("file://", ""),
+      type: "multipart/form-data",
+      name: "image.jpg",
+    };
+    const body = new FormData();
+    body.append("file", file);
+    try {
+      const res = await fetch("http://100.64.1.76:7001/upload", {
+        method: "POST",
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        body,
+      });
+      const data = await res.json();
+      setCapturedImage(null);
+      setPreviewVisible(false);
+      setStartCamera(false);
+      navigation.navigate("Result", { data });
+    } catch (e) {
+      console.log(e);
+      __retakePicture();
+    }
+  };
+
   const __takePicture = async () => {
     const photo = await camera.takePictureAsync();
     setPreviewVisible(true);
@@ -35,23 +80,8 @@ export default function App({ navigation }) {
     if (loading) return;
     setLoading(true);
     const photo = capturedImage;
-    const body = new FormData();
-    body.append("photo", photo);
-    try {
-      res = await fetch("http://100.64.1.76:7001/upload", {
-        method: "POST",
-        body,
-      });
-      const data = await res.json();
-      setLoading(false);
-      setCapturedImage(null);
-      setPreviewVisible(false);
-      navigation.navigate("Result", { data });
-    } catch (e) {
-      console.log(e);
-      setLoading(false);
-      __retakePicture();
-    }
+    await __uploadImage(photo);
+    setLoading(false);
   };
   const __retakePicture = () => {
     setCapturedImage(null);
@@ -74,6 +104,15 @@ export default function App({ navigation }) {
       setCameraType("back");
     }
   };
+
+  if (loading) {
+    return (
+      <View style={[styles.container, styles.horizontal]}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       {startCamera ? (
@@ -267,5 +306,10 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     alignItems: "center",
     justifyContent: "center",
+  },
+  horizontal: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    padding: 10,
   },
 });
