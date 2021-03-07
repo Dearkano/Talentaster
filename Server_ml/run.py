@@ -70,7 +70,7 @@ def call_cv_api(input_file_path):
     img_byte = open(input_file_path, "rb")
     url = 'https://zhixinlai16.cognitiveservices.azure.com/vision/v3.1/describe'
     headers = {
-        'Ocp-Apim-Subscription-Key': '6a8a206b11e0409384baa0d0bbd1d3c6',
+        'Ocp-Apim-Subscription-Key': '',
     }
     files = {'file': img_byte}
     result = requests.post(url, files=files, headers=headers)
