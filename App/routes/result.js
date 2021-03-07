@@ -21,11 +21,11 @@ import {
 export default function Result({ route, navigation }) {
   const { data, photo } = route.params;
   const sampleData1 = [
-    { x: "plumbness", y: 20 },
-    { x: "fibrousness", y: 30 },
-    { x: "crispness", y: 65 },
-    { x: "sweetness", y: 50 },
-    { x: "sourness", y: 40 },
+    { x: "plumbness", y: data.plumbness },
+    { x: "fibrousness", y: data.fibrousness },
+    { x: "crispness", y: data.crispness },
+    { x: "sweetness", y: data.sweetness },
+    { x: "sourness", y: data.sourness },
   ];
 
   const sampleData2 = [
@@ -37,12 +37,29 @@ export default function Result({ route, navigation }) {
     { x: "soluble solids", y: 30 },
   ];
 
-  height = 300;
-  width = (300 / photo.height) * photo.width;
-  fruit = "Apple";
+  let width = 0;
+  let height = 0;
+  const transform = [];
+
+  if (photo.height > photo.width) {
+    height = 300;
+    width = (300 / photo.height) * photo.width;
+    transform.push({ rotateZ: "-90deg" });
+  } else {
+    width = 300;
+    height = (300 / photo.height) * photo.width;
+  }
+  fruit = data.tag;
   return (
     <ScrollView style={styles.container}>
-      <View style={styles.image}>
+      <View
+        style={{
+          display: "flex",
+          alignItems: "center",
+          marginTop: 100,
+          transform: transform,
+        }}
+      >
         <Image
           style={{ width: width, height: height }}
           source={{
