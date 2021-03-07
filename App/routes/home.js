@@ -7,12 +7,20 @@ import {
   TouchableOpacity,
   Alert,
   ActivityIndicator,
+  Dimensions,
+  ImageBackground,
 } from "react-native";
 import { Camera } from "expo-camera";
 import { CameraPreview } from "../Component/camera";
 import * as ImagePicker from "expo-image-picker";
+import { Block, Button, theme } from "galio-framework";
+
+import materialTheme from "../Constants/Theme";
+import Images from "../Constants/Image";
+import * as ImageManipulator from "expo-image-manipulator";
 
 let camera = null;
+const { height, width } = Dimensions.get("screen");
 export default function App({ navigation }) {
   const [startCamera, setStartCamera] = useState(false);
   const [previewVisible, setPreviewVisible] = useState(false);
@@ -43,7 +51,12 @@ export default function App({ navigation }) {
     }
   };
 
-  const __uploadImage = async (photo) => {
+  const __uploadImage = async (image) => {
+    const photo = await ImageManipulator.manipulateAsync(
+      image.localUri || image.uri,
+      [],
+      { compress: 0.4, format: ImageManipulator.SaveFormat.JPEG }
+    );
     const file = {
       uri: photo.uri.replace("file://", ""),
       type: "multipart/form-data",
@@ -52,7 +65,14 @@ export default function App({ navigation }) {
     const body = new FormData();
     body.append("file", file);
     try {
-      const res = await fetch("http://100.64.1.76:7001/upload", {
+      //   const res = await fetch("http://100.64.1.76:7001/upload", {
+      //     method: "POST",
+      //     headers: {
+      //       "Content-Type": "multipart/form-data",
+      //     },
+      //     body,
+      //   });
+      const res = await fetch("http://18.181.247.60:5010/postFile", {
         method: "POST",
         headers: {
           "Content-Type": "multipart/form-data",
@@ -63,7 +83,7 @@ export default function App({ navigation }) {
       setCapturedImage(null);
       setPreviewVisible(false);
       setStartCamera(false);
-      navigation.navigate("Result", { data });
+      navigation.navigate("Result", { data, photo });
     } catch (e) {
       console.log(e);
       __retakePicture();
@@ -71,7 +91,7 @@ export default function App({ navigation }) {
   };
 
   const __takePicture = async () => {
-    const photo = await camera.takePictureAsync();
+    const photo = await camera.takePictureAsync({ base64: true });
     setPreviewVisible(true);
     //setStartCamera(false)
     setCapturedImage(photo);
@@ -224,75 +244,10 @@ export default function App({ navigation }) {
           )}
         </View>
       ) : (
-        <View
-          style={{
-            display: "flex",
-            flexDirection: "row",
-          }}
-        >
-          <View
-            style={{
-              flex: 1,
-              backgroundColor: "#fff",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <TouchableOpacity
-              onPress={__startCamera}
-              style={{
-                width: 130,
-                borderRadius: 4,
-                backgroundColor: "#14274e",
-                flexDirection: "row",
-                justifyContent: "center",
-                alignItems: "center",
-                height: 40,
-              }}
-            >
-              <Text
-                style={{
-                  color: "#fff",
-                  fontWeight: "bold",
-                  textAlign: "center",
-                }}
-              >
-                Take picture
-              </Text>
-            </TouchableOpacity>
-          </View>
-          <View
-            style={{
-              flex: 1,
-              backgroundColor: "#fff",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <TouchableOpacity
-              onPress={__loadLibrary}
-              style={{
-                width: 130,
-                borderRadius: 4,
-                backgroundColor: "#14274e",
-                flexDirection: "row",
-                justifyContent: "center",
-                alignItems: "center",
-                height: 40,
-              }}
-            >
-              <Text
-                style={{
-                  color: "#fff",
-                  fontWeight: "bold",
-                  textAlign: "center",
-                }}
-              >
-                Load from library
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
+        <HomeScreen
+          __loadLibrary={__loadLibrary}
+          __startCamera={__startCamera}
+        />
       )}
 
       <StatusBar style="auto" />
@@ -300,12 +255,64 @@ export default function App({ navigation }) {
   );
 }
 
+const HomeScreen = ({ __startCamera, __loadLibrary }) => {
+  return (
+    <Block flex style={styles.container}>
+      <StatusBar barStyle="light-content" />
+      <Block flex center>
+        <ImageBackground
+          source={{ uri: Images.Onboarding }}
+          style={{ height: height, width: width, marginTop: "-55%", zIndex: 1 }}
+        />
+      </Block>
+      <Block flex space="between" style={styles.padded}>
+        <Block flex space="around" style={{ zIndex: 2 }}>
+          <Block>
+            <Block>
+              <Text color="white" size={60}>
+                Material
+              </Text>
+            </Block>
+            <Block row>
+              <Text color="white" size={60}>
+                Kit
+              </Text>
+            </Block>
+            <Text size={16} color="rgba(255,255,255,0.6)">
+              Fully coded React Native components.
+            </Text>
+          </Block>
+          <Block center row>
+            <Button
+              shadowless
+              style={styles.button}
+              color={materialTheme.COLORS.BUTTON_COLOR}
+              onPress={() => __startCamera()}
+            >
+              Camera
+            </Button>
+            <Button
+              shadowless
+              style={styles.button}
+              color={materialTheme.COLORS.BUTTON_COLOR}
+              onPress={() => __loadLibrary()}
+            >
+              Library
+            </Button>
+          </Block>
+        </Block>
+      </Block>
+    </Block>
+  );
+};
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
     alignItems: "center",
     justifyContent: "center",
+    backgroundColor: "black",
   },
   horizontal: {
     flexDirection: "row",
