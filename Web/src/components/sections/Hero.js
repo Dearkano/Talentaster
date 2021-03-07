@@ -7,6 +7,7 @@ import Image from '../elements/Image';
 import Modal from '../elements/Modal';
 import FileUpload from '../../hackathon/FileUpload'
 import DetectedInfo from '../../hackathon/DetectedInfo'
+import DataUpload from '../../hackathon/DataUpload'
 import FeaturesTiles from '../../components/sections/FeaturesTiles';
 
 const propTypes = {
@@ -95,6 +96,9 @@ const Hero = ({
               <div style={{height: 100}}> </div>
               <div className="reveal-from-bottom" data-reveal-delay="600">
                 <FileUpload />
+                {/* <DataUpload /> */}
+              </div>
+              <div className="reveal-from-bottom section-inner" data-reveal-delay="600">
                 <DetectedInfo/>
               </div>
             </div>
