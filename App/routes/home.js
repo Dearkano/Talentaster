@@ -2,7 +2,6 @@ import { StatusBar } from "expo-status-bar";
 import React, { useState } from "react";
 import {
   StyleSheet,
-  Text,
   View,
   TouchableOpacity,
   Alert,
@@ -13,7 +12,7 @@ import {
 import { Camera } from "expo-camera";
 import { CameraPreview } from "../Component/camera";
 import * as ImagePicker from "expo-image-picker";
-import { Block, Button, theme } from "galio-framework";
+import { Block, Button, theme, Text } from "galio-framework";
 
 import materialTheme from "../Constants/Theme";
 import Images from "../Constants/Image";
@@ -72,7 +71,7 @@ export default function App({ navigation }) {
       //     },
       //     body,
       //   });
-      const res = await fetch("http://18.181.247.60:5010/postFile", {
+      const res = await fetch("http://18.181.247.60:5010/postMobile", {
         method: "POST",
         headers: {
           "Content-Type": "multipart/form-data",
@@ -80,13 +79,17 @@ export default function App({ navigation }) {
         body,
       });
       const data = await res.json();
+      console.log(data);
       setCapturedImage(null);
       setPreviewVisible(false);
       setStartCamera(false);
       navigation.navigate("Result", { data, photo });
     } catch (e) {
       console.log(e);
-      __retakePicture();
+      setCapturedImage(null);
+      setPreviewVisible(false);
+      setStartCamera(false);
+      navigation.navigate("Home");
     }
   };
 
@@ -270,16 +273,11 @@ const HomeScreen = ({ __startCamera, __loadLibrary }) => {
           <Block>
             <Block>
               <Text color="white" size={60}>
-                Material
-              </Text>
-            </Block>
-            <Block row>
-              <Text color="white" size={60}>
-                Kit
+                Talentaster
               </Text>
             </Block>
             <Text size={16} color="rgba(255,255,255,0.6)">
-              Fully coded React Native components.
+              Make the world a better place
             </Text>
           </Block>
           <Block center row>
