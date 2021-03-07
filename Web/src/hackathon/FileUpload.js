@@ -2,7 +2,7 @@ import React from 'react';
 import { useForm } from "react-hook-form";
 import ButtonGroup from "../components/elements/ButtonGroup";
 import Button from "../components/elements/Button";
-import axiox from 'axios';
+// import axios from 'axios';
 
 const FileUpload = ({
     fileName,
@@ -19,16 +19,27 @@ const FileUpload = ({
         if (fileInfo != null) {
             const data = new FormData()
             data.append('file', fileInfo)
+            data.append('name', "Bowen")
             const headerData = new Headers()
             headerData.append("Content-Type", "multipart/form-data");
+            // const res = await axios.post("http://18.181.247.60:5010/postServer", data, headerData);
             const res = await fetch("http://18.181.247.60:5010/postServer", {
                 method: "POST",
-                headers: headerData,
-                body: data,
-            });
-            console.log(res.data)
-            const getData = await res.json();
-            console.log(getData);
+                body: data
+            })
+            const blob = await res.blob()
+            var url = window.URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = "result.csv";
+            document.body.appendChild(a); // we need to append the element to the dom -> otherwise it will not work in firefox
+            a.click();    
+            a.remove();
+        
+
+            // console.log(res.data)
+            // const getData = await res;
+            // console.log(getData);
         }
         // console.log(fileInfo)
     }
@@ -39,6 +50,7 @@ const FileUpload = ({
         const extention = fileName.split('.').pop();
         if (extention == "csv") {
             // store file data in local variable
+            console.log(file)
             setFileInfo(file);
         } else {
             alert("Please upload a csv file!");
